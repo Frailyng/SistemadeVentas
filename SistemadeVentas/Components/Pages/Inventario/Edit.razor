@@ -1,5 +1,119 @@
-﻿<h3>Edit</h3>
+﻿@page "/Inventario/Edit/{InventarioId:int}"
+@inject InventarioService InventarioService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="inventario" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3> <i class="fas fa-clipboard-list"></i> Editar Inventario</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label for="InventarioId" class="form-label">InventarioId:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="inventario.InventarioId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="ProductoId" class="form-label">Producto:</label>
+                <InputNumber @bind-Value="inventario.ProductoId" class="form-control" />
+                <ValidationMessage For="@(() => inventario.ProductoId)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="CantidadDisponible" class="form-label">Cantidad Disponible:</label>
+                <InputNumber @bind-Value="inventario.CantidadDisponible" class="form-control" />
+                <ValidationMessage For="@(() => inventario.CantidadDisponible)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="FechaIngreso" class="form-label">Fecha de Ingreso:</label>
+                <InputDate @bind-Value="inventario.FechaIngreso" class="form-control" />
+                <ValidationMessage For="@(() => inventario.FechaIngreso)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="FechaUltimaActualizacion" class="form-label">Fecha Última Actualización:</label>
+                <InputDate @bind-Value="inventario.FechaUltimaActualizacion" class="form-control" />
+            </div>
+
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span> Nuevo </button>
+                <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+                <a type="button" href="/Inventario/Index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 @code {
+    [Parameter]
+    public int? InventarioId { get; set; }
+    public Inventario inventario { get; set; } = new Inventario();
+    private bool Existe = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (InventarioId.HasValue)
+        {
+            inventario.InventarioId = InventarioId.Value;
+            await Buscar(); // Verifica que el inventario exista y recupéralo.
+        }
+    }
+
+
+    public void Nuevo()
+    {
+        inventario = new Inventario();
+        InventarioId = null;  // Reinicia el parámetro
+        Existe = false;
+    }
+
+
+    public async Task Buscar()
+    {
+        var inventarioEncontrado = await InventarioService.Buscar(inventario.InventarioId);
+
+        if (inventarioEncontrado != null)
+        {
+            inventario = inventarioEncontrado;
+        }
+       
+    }
+
+    public async Task<bool> Validar()
+    {
+        Existe = await InventarioService.Existe(inventario.InventarioId);
+        return true; // Permitir tanto la inserción como la modificación.
+    }
+
+    public async Task Guardar()
+    {
+        var guardo = await InventarioService.Guardar(inventario);
+        if (guardo)
+        {
+            Nuevo();
+            NavigationManager.NavigateTo("/Inventario/Index/");
+        }
+    }
+
+
+    public async Task Eliminar()
+    {
+        var eliminado = await InventarioService.Eliminar(inventario.InventarioId);
+        Nuevo();
+    }
 }
