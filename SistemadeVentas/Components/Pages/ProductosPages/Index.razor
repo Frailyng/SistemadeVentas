@@ -43,7 +43,6 @@
                 <th>Categoría</th>
                 <th>Proveedor</th>
                 <th>Activo</th>
-                <th>Ver</th>
                 <th>Editar</th>
                 <th>Eliminar</th>
             </tr>
@@ -62,12 +61,6 @@
                         <td>@producto.Proveedor</td>
                         <td>@(producto.EstaActivo ? "Sí" : "No")</td>
                         <td>
-                            <a class="btn btn-outline-primary" href="/Productos/Details/@producto.ProductoId">
-                                <span class="bi bi-info-circle-fill"></span>
-                            </a>
-                        </td>
-
-                        <td>
                             <a class="btn btn-outline-success" href="/Productos/Edit/@producto.ProductoId">
                                 <span class="bi bi-marker-tip"></span>
                             </a>
@@ -84,7 +77,7 @@
             else
             {
                 <tr>
-                    <td colspan="10">No hay registros disponibles</td>
+                    <td colspan="9">No hay registros disponibles</td>
                 </tr>
             }
         </tbody>
