@@ -68,7 +68,7 @@
                                             <button class="btn btn-warning" @onclick="@(() => EditarProducto(producto.ProductoId))">Modificar</button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-danger" @onclick="@(() => EliminarProducto(producto.ProductoId))">Eliminar</button>
+                                            <button class="btn btn-danger" @onclick="@(() => ConfirmarEliminar(producto.ProductoId))">Eliminar</button>
                                         </td>
                                     </tr>
                                 }
@@ -153,14 +153,7 @@
 
     private async Task GuardarProducto()
     {
-        if (productoActual.ProductoId == 0)
-        {
-            await _productosService.Insertar(productoActual);
-        }
-        else
-        {
-            await _productosService.Modificar(productoActual);
-        }
+        await _productosService.Guardar(productoActual);
         mostrarFormulario = false;
         await CargarProductos();
     }
@@ -171,17 +164,30 @@
         mostrarFormulario = true;
     }
 
-    private async Task EliminarProducto(int id)
+    private async Task ConfirmarEliminar(int id)
     {
-        await _productosService.Eliminar(id);
-        await CargarProductos();
+        bool existe = await _productosService.Existe(id);
+        if (existe)
+        {
+            bool eliminado = await _productosService.Eliminar(id);
+            if (eliminado)
+            {
+                await CargarProductos();
+            }
+        }
     }
 
     private async Task BuscarProducto()
     {
         if (!string.IsNullOrWhiteSpace(valorFiltro))
         {
-            productos = await _productosService.BuscarPorNombre(valorFiltro);
+            // Lógica para filtrar productos en la lista según el valor de filtro
+            productos = await _productosService.Lista();
+
+            // Filtrar según el criterio deseado (puedes cambiar las condiciones)
+            productos = productos.Where(p =>
+                p.Nombre.ToLower().Contains(valorFiltro.ToLower()) ||
+                p.Descripcion.ToLower().Contains(valorFiltro.ToLower())).ToList();
         }
         else
         {
