@@ -1,0 +1,196 @@
+﻿@page "/productos/index"
+@inject ProductosService _productosService
+
+<h3>Productos</h3>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Agregar Producto</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-light" @onclick="MostrarFormulario">Agregar Producto</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card bg-light mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Lista de Productos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Buscar..." @bind="valorFiltro" />
+                        <button class="btn btn-primary" @onclick="BuscarProducto">Buscar</button>
+                    </div>
+
+                    @if (productos == null)
+                    {
+                        <p>Cargando...</p>
+                    }
+                    else if (productos.Count == 0)
+                    {
+                        <p>No hay productos disponibles.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Precio</th>
+                                    <th>Categoría</th>
+                                    <th>Código</th>
+                                    <th>Proveedor</th>
+                                    <th>Activo</th>
+                                    <th>Modificar</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var producto in productos)
+                                {
+                                    <tr>
+                                        <td>@producto.ProductoId</td>
+                                        <td>@producto.Nombre</td>
+                                        <td>@producto.Descripcion</td>
+                                        <td>@producto.Precio.ToString("C")</td>
+                                        <td>@producto.Categoria</td>
+                                        <td>@producto.CodigoProducto</td>
+                                        <td>@producto.Proveedor</td>
+                                        <td>@(producto.EstaActivo ? "Sí" : "No")</td>
+                                        <td>
+                                            <button class="btn btn-warning" @onclick="@(() => EditarProducto(producto.ProductoId))">Modificar</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger" @onclick="@(() => EliminarProducto(producto.ProductoId))">Eliminar</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                <div class="card-footer">
+                    <span>Cantidad de Registros: @productos.Count</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (mostrarFormulario)
+{
+    <EditForm Model="productoActual" OnValidSubmit="GuardarProducto">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label>Nombre:</label>
+            <InputText @bind-Value="productoActual.Nombre" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.Nombre)" />
+        </div>
+        <div class="form-group">
+            <label>Descripción:</label>
+            <InputText @bind-Value="productoActual.Descripcion" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.Descripcion)" />
+        </div>
+        <div class="form-group">
+            <label>Precio:</label>
+            <InputNumber @bind-Value="productoActual.Precio" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.Precio)" />
+        </div>
+        <div class="form-group">
+            <label>Categoría:</label>
+            <InputText @bind-Value="productoActual.Categoria" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.Categoria)" />
+        </div>
+        <div class="form-group">
+            <label>Código:</label>
+            <InputText @bind-Value="productoActual.CodigoProducto" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.CodigoProducto)" />
+        </div>
+        <div class="form-group">
+            <label>Proveedor:</label>
+            <InputText @bind-Value="productoActual.Proveedor" class="form-control" />
+            <ValidationMessage For="@(() => productoActual.Proveedor)" />
+        </div>
+        <div class="form-group">
+            <label>Activo:</label>
+            <InputCheckbox @bind-Value="productoActual.EstaActivo" />
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    private List<Productos> productos;
+    private Productos productoActual = new Productos();
+    private bool mostrarFormulario = false;
+    private string valorFiltro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProductos();
+    }
+
+    private async Task CargarProductos()
+    {
+        productos = await _productosService.Lista();
+    }
+
+    private void MostrarFormulario()
+    {
+        productoActual = new Productos();
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarProducto()
+    {
+        if (productoActual.ProductoId == 0)
+        {
+            await _productosService.Insertar(productoActual);
+        }
+        else
+        {
+            await _productosService.Modificar(productoActual);
+        }
+        mostrarFormulario = false;
+        await CargarProductos();
+    }
+
+    private async Task EditarProducto(int id)
+    {
+        productoActual = await _productosService.Buscar(id);
+        mostrarFormulario = true;
+    }
+
+    private async Task EliminarProducto(int id)
+    {
+        await _productosService.Eliminar(id);
+        await CargarProductos();
+    }
+
+    private async Task BuscarProducto()
+    {
+        if (!string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            productos = await _productosService.BuscarPorNombre(valorFiltro);
+        }
+        else
+        {
+            await CargarProductos();
+        }
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}
