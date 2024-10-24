@@ -11,7 +11,7 @@
                     <h5 class="card-title">Agregar Producto</h5>
                 </div>
                 <div class="card-body">
-                    <button class="btn btn-light" @onclick="MostrarFormulario">Agregar Producto</button>
+                    <a class="btn btn-light" href="/productos/create">Agregar Producto</a> <!-- Cambiado a enlace -->
                 </div>
             </div>
         </div>
@@ -145,12 +145,6 @@
         productos = await _productosService.Lista();
     }
 
-    private void MostrarFormulario()
-    {
-        productoActual = new Productos();
-        mostrarFormulario = true;
-    }
-
     private async Task GuardarProducto()
     {
         await _productosService.Guardar(productoActual);
@@ -181,10 +175,7 @@
     {
         if (!string.IsNullOrWhiteSpace(valorFiltro))
         {
-            // Lógica para filtrar productos en la lista según el valor de filtro
             productos = await _productosService.Lista();
-
-            // Filtrar según el criterio deseado (puedes cambiar las condiciones)
             productos = productos.Where(p =>
                 p.Nombre.ToLower().Contains(valorFiltro.ToLower()) ||
                 p.Descripcion.ToLower().Contains(valorFiltro.ToLower())).ToList();

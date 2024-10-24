@@ -15,11 +15,16 @@ namespace SistemadeVentas.Services
 
         public async Task<bool> Guardar(Productos producto)
         {
-            if (producto.ProductoId == 0)
-                return await Insertar(producto);
+            if (await Existe(producto.ProductoId)) // Verifica si el producto existe
+            {
+                return await Modificar(producto); // Si existe, llama al método Modificar
+            }
             else
-                return await Modificar(producto);
+            {
+                return await Insertar(producto); // Si no existe, llama al método Insertar
+            }
         }
+
 
         public async Task<bool> Insertar(Productos producto)
         {

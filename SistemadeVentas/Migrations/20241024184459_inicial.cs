@@ -75,7 +75,7 @@ namespace SistemadeVentas.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Inventario",
+                name: "Inventarios",
                 columns: table => new
                 {
                     InventarioId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -87,9 +87,9 @@ namespace SistemadeVentas.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Inventario", x => x.InventarioId);
+                    table.PrimaryKey("PK_Inventarios", x => x.InventarioId);
                     table.ForeignKey(
-                        name: "FK_Inventario_Productos_ProductoId",
+                        name: "FK_Inventarios_Productos_ProductoId",
                         column: x => x.ProductoId,
                         principalTable: "Productos",
                         principalColumn: "ProductoId",
@@ -107,8 +107,8 @@ namespace SistemadeVentas.Migrations
                 column: "ProductoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inventario_ProductoId",
-                table: "Inventario",
+                name: "IX_Inventarios_ProductoId",
+                table: "Inventarios",
                 column: "ProductoId");
         }
 
@@ -119,7 +119,7 @@ namespace SistemadeVentas.Migrations
                 name: "DetalleFactura");
 
             migrationBuilder.DropTable(
-                name: "Inventario");
+                name: "Inventarios");
 
             migrationBuilder.DropTable(
                 name: "Facturaciones");

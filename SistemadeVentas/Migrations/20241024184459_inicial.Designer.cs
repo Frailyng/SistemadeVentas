@@ -11,7 +11,7 @@ using SistemadeVentas.DAL;
 namespace SistemadeVentas.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20241024165827_inicial")]
+    [Migration("20241024184459_inicial")]
     partial class inicial
     {
         /// <inheritdoc />
@@ -98,7 +98,7 @@ namespace SistemadeVentas.Migrations
 
                     b.HasIndex("ProductoId");
 
-                    b.ToTable("Inventario");
+                    b.ToTable("Inventarios");
                 });
 
             modelBuilder.Entity("SistemadeVentas.Models.Productos", b =>

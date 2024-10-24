@@ -1,5 +1,106 @@
-﻿<h3>Create</h3>
+﻿@page "/productos/create"
+@inject ProductosService _productosService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="productoActual" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3><i class="fas fa-box"></i> Registro de Productos</h3>
+        </div>
+
+        <div class="card-body">
+            @* ProductoId *@
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ProductoId" class="form-label">ProductoId:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="productoActual.ProductoId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Nombre *@
+            <div class="mb-3">
+                <label for="Nombre" class="form-label">Nombre:</label>
+                <InputText @bind-Value="productoActual.Nombre" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.Nombre)" />
+            </div>
+
+            @* Descripción *@
+            <div class="mb-3">
+                <label for="Descripcion" class="form-label">Descripción:</label>
+                <InputText @bind-Value="productoActual.Descripcion" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.Descripcion)" />
+            </div>
+
+            @* Precio *@
+            <div class="mb-3">
+                <label for="Precio" class="form-label">Precio:</label>
+                <InputNumber @bind-Value="productoActual.Precio" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.Precio)" />
+            </div>
+
+            @* Categoría *@
+            <div class="mb-3">
+                <label for="Categoria" class="form-label">Categoría:</label>
+                <InputText @bind-Value="productoActual.Categoria" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.Categoria)" />
+            </div>
+
+            @* Código Producto *@
+            <div class="mb-3">
+                <label for="CodigoProducto" class="form-label">Código Producto:</label>
+                <InputText @bind-Value="productoActual.CodigoProducto" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.CodigoProducto)" />
+            </div>
+
+            @* Proveedor *@
+            <div class="mb-3">
+                <label for="Proveedor" class="form-label">Proveedor:</label>
+                <InputText @bind-Value="productoActual.Proveedor" class="form-control" />
+                <ValidationMessage For="@(() => productoActual.Proveedor)" />
+            </div>
+
+            @* Activo *@
+            <div class="mb-3">
+                <label for="EstaActivo" class="form-label">Activo:</label>
+                <InputCheckbox @bind-Value="productoActual.EstaActivo" />
+            </div>
+
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span> Nuevo </button>
+                <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+                <a type="button" href="/productos/index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 @code {
+    private Productos productoActual = new Productos();
+    private bool existe = false;
+
+    public void Nuevo()
+    {
+        productoActual = new Productos();
+        existe = false;
+    }
+
+    public async Task Guardar()
+    {
+        var guardo = await _productosService.Guardar(productoActual);
+        if (guardo)
+        {
+            Nuevo();
+            NavigationManager.NavigateTo("/productos/index"); // Redirigir a la lista de productos después de guardar
+        }
+    }
 
 }

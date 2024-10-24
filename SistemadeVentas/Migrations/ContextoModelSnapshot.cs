@@ -95,7 +95,7 @@ namespace SistemadeVentas.Migrations
 
                     b.HasIndex("ProductoId");
 
-                    b.ToTable("Inventario");
+                    b.ToTable("Inventarios");
                 });
 
             modelBuilder.Entity("SistemadeVentas.Models.Productos", b =>
