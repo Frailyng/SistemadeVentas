@@ -1,0 +1,130 @@
+﻿@page "/Inventario/Index"
+
+@inject InventarioService InventarioService;
+@rendermode InteractiveServer
+
+<EditForm Model="ListaInventarios" class="border shadow-lg p-3 rounded">
+    
+    <div class="card-header bg-primary text-white text-center py-2 rounded">
+        <h3 style="font-weight: bold;" class="mb-0">Consulta Inventario</h3>
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-3 align-items-end">
+            <div class="col-md-3">
+                <label for="Filtro" class="form-label">Filtrar por:</label>
+                <select @bind="filtro" class="form-select">
+                    <option value="inventarioid">Inventario ID</option>
+                    <option value="producto">Producto</option>
+                    <option value="cantidad">Cantidad Disponible</option>
+                    <option value="fechacingreso">Fecha de Ingreso</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="ValorFiltro" class="form-label">Búsqueda:</label>
+                <div class="input-group">
+                    <input @bind="valorFiltro" class="form-control" placeholder="Buscar" />
+                    <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                        <span class="bi bi-search"></span> Buscar
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-3 text-end">
+                <a href="/Inventario/Create" class="btn btn-success" type="button"><span class="bi bi-floppy"></span> Crear </a>
+            </div>
+        </div>
+    </div>
+    <table class="table table-bordered text-center">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th>Inventario ID</th>
+                <th>Producto</th>
+                <th>Cantidad Disponible</th>
+                <th>Fecha de Ingreso</th>
+                <th>Fecha Última Actualización</th>
+                <th>Ver</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ListaInventarios.Count > 0)
+            {
+                foreach (var inventario in ListaInventarios)
+                {
+                    <tr>
+                        <td>@inventario.InventarioId</td>
+                        <td>@inventario.Producto.Nombre</td>
+                        <td>@inventario.CantidadDisponible</td>
+                        <td>@inventario.FechaIngreso.ToShortDateString()</td>
+                        <td>@inventario.FechaUltimaActualizacion.ToShortDateString()</td>
+                        <td>
+                            <a class="btn btn-outline-primary" href="/Inventario/Details/@inventario.InventarioId">
+                                <span class="bi bi-info-circle-fill"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline-success" href="/Inventario/Edit/@inventario.InventarioId">
+                                <span class="bi bi-marker-tip"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline-warning" href="/Inventario/Delete/@inventario.InventarioId">
+                                <span class="bi bi-dash-circle-fill"></span>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">No hay registros disponibles</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</EditForm>
+
+@code {
+    public Inventario Inventario = new Inventario();
+
+    public List<Inventario> ListaInventarios = new List<Inventario>();
+
+    
+
+    private string filtro = "inventarioid";
+    private string valorFiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaInventarios = await InventarioService.Listar(c => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (valorFiltro.Trim() != "")
+        {
+            if (filtro == "inventarioid" && int.TryParse(valorFiltro, out int inventarioId))
+            {
+                ListaInventarios = await InventarioService.Listar(i => i.InventarioId == inventarioId);
+            }
+            else if (filtro == "producto")
+            {
+                ListaInventarios = await InventarioService.Listar(i => i.Producto.Nombre.Contains(valorFiltro));
+            }
+            else if (filtro == "cantidad" && int.TryParse(valorFiltro, out int cantidad))
+            {
+                ListaInventarios = await InventarioService.Listar(i => i.CantidadDisponible == cantidad);
+            }
+            else if (filtro == "fechacingreso" && DateTime.TryParse(valorFiltro, out DateTime fechaIngreso))
+            {
+                ListaInventarios = await InventarioService.Listar(i => i.FechaIngreso.Date == fechaIngreso.Date);
+            }
+        }
+        else
+        {
+            ListaInventarios = await InventarioService.Listar(i => true);
+        }
+    }
+}

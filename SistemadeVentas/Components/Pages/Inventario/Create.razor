@@ -1,0 +1,88 @@
+﻿@page "/inventario/create"
+@inject InventarioService _inventarioService
+@inject ProductosService _productosService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="inventarioActual" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3><i class="fas fa-box"></i> Registro de Inventario</h3>
+        </div>
+
+        <div class="card-body">
+            @* InventarioId *@
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="InventarioId" class="form-label">InventarioId:</label>
+                    <InputNumber @bind-Value="inventarioActual.InventarioId" class="form-control" disabled />
+                </div>
+            </div>
+
+            @* Seleccionar Producto *@
+            <div class="mb-3">
+                <label for="ProductoId" class="form-label">Producto:</label>
+                <InputSelect @bind-Value="inventarioActual.ProductoId" class="form-control">
+                    <option value="">Seleccione un producto</option>
+                    @foreach (var producto in productosDisponibles)
+                    {
+                        <option value="@producto.ProductoId">@producto.Nombre</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => inventarioActual.ProductoId)" />
+            </div>
+
+            @* Cantidad Disponible *@
+            <div class="mb-3">
+                <label for="CantidadDisponible" class="form-label">Cantidad Disponible:</label>
+                <InputNumber @bind-Value="inventarioActual.CantidadDisponible" class="form-control" />
+                <ValidationMessage For="@(() => inventarioActual.CantidadDisponible)" />
+            </div>
+
+            @* Fecha de Ingreso *@
+            <div class="mb-3">
+                <label for="FechaIngreso" class="form-label">Fecha de Ingreso:</label>
+                <InputDate @bind-Value="inventarioActual.FechaIngreso" class="form-control" />
+                <ValidationMessage For="@(() => inventarioActual.FechaIngreso)" />
+            </div>
+
+            @* Fecha Última Actualización *@
+            <div class="mb-3">
+                <label for="FechaUltimaActualizacion" class="form-label">Fecha Última Actualización:</label>
+                <InputDate @bind-Value="inventarioActual.FechaUltimaActualizacion" class="form-control" />
+                <ValidationMessage For="@(() => inventarioActual.FechaUltimaActualizacion)" />
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+                <a type="button" href="/inventario/index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Inventario inventarioActual = new Inventario();
+    private List<Productos> productosDisponibles = new List<Productos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtener la lista de productos disponibles
+        productosDisponibles = await _productosService.Listar(p => true);
+        inventarioActual.FechaIngreso = DateTime.Now; // Establecer fecha de ingreso por defecto
+        inventarioActual.FechaUltimaActualizacion = DateTime.Now; // Establecer fecha de actualización por defecto
+    }
+
+    public async Task Guardar()
+    {
+        var guardo = await _inventarioService.Guardar(inventarioActual);
+        if (guardo)
+        {
+            NavigationManager.NavigateTo("/inventario/index"); // Redirigir a la lista de inventarios después de guardar
+        }
+    }
+}
+
