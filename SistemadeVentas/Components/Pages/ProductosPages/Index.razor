@@ -1,193 +1,137 @@
-﻿@page "/productos/index"
-@inject ProductosService _productosService
+﻿@page "/Productos/Index"
+@inject ProductosService ProductosService;
+@rendermode InteractiveServer
 
-<h3>Productos</h3>
+<EditForm Model="ListaProductos" class="border shadow-lg p-3 rounded">
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-header">
-                    <h5 class="card-title">Agregar Producto</h5>
-                </div>
-                <div class="card-body">
-                    <a class="btn btn-light" href="/productos/create">Agregar Producto</a> <!-- Cambiado a enlace -->
+    <div class="card-header bg-primary text-white text-center py-2 rounded">
+        <h3 style="font-weight: bold;" class="mb-0 font-weight-bold">Consulta Productos</h3>
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-3 align-items-end">
+            <div class="col-md-3">
+                <label for="Filtro" class="form-label">Filtrar por:</label>
+                <select @bind="filtro" class="form-select">
+                    <option value="codigoProducto">Código Producto</option>
+                    <option value="nombre">Nombre</option>
+                    <option value="categoria">Categoría</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="ValorFiltro" class="form-label">Búsqueda:</label>
+                <div class="input-group">
+                    <input @bind="valorFiltro" class="form-control" placeholder="Buscar" />
+                    <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                        <span class="bi bi-search"></span> Buscar
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <div class="col-md-8">
-            <div class="card bg-light mb-3">
-                <div class="card-header">
-                    <h5 class="card-title">Lista de Productos</h5>
-                </div>
-                <div class="card-body">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Buscar..." @bind="valorFiltro" />
-                        <button class="btn btn-primary" @onclick="BuscarProducto">Buscar</button>
-                    </div>
-
-                    @if (productos == null)
-                    {
-                        <p>Cargando...</p>
-                    }
-                    else if (productos.Count == 0)
-                    {
-                        <p>No hay productos disponibles.</p>
-                    }
-                    else
-                    {
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Precio</th>
-                                    <th>Categoría</th>
-                                    <th>Código</th>
-                                    <th>Proveedor</th>
-                                    <th>Activo</th>
-                                    <th>Modificar</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var producto in productos)
-                                {
-                                    <tr>
-                                        <td>@producto.ProductoId</td>
-                                        <td>@producto.Nombre</td>
-                                        <td>@producto.Descripcion</td>
-                                        <td>@producto.Precio.ToString("C")</td>
-                                        <td>@producto.Categoria</td>
-                                        <td>@producto.CodigoProducto</td>
-                                        <td>@producto.Proveedor</td>
-                                        <td>@(producto.EstaActivo ? "Sí" : "No")</td>
-                                        <td>
-                                            <button class="btn btn-warning" @onclick="@(() => EditarProducto(producto.ProductoId))">Modificar</button>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-danger" @onclick="@(() => ConfirmarEliminar(producto.ProductoId))">Eliminar</button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
-                <div class="card-footer">
-                    <span>Cantidad de Registros: @productos.Count</span>
-                </div>
+            <div class="col-md-3 text-end">
+                <a href="/Productos/Create" class="btn btn-success" type="button"><span class="bi bi-floppy"></span> Crear </a>
             </div>
         </div>
     </div>
-</div>
 
-@if (mostrarFormulario)
-{
-    <EditForm Model="productoActual" OnValidSubmit="GuardarProducto">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <table class="table table-bordered text-center">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th>Código Producto</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Categoría</th>
+                <th>Proveedor</th>
+                <th>Activo</th>
+                <th>Ver</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ListaProductos != null && ListaProductos.Any())
+            {
+                @foreach (var producto in ListaProductos)
+                {
+                    <tr>
+                        <td>@producto.CodigoProducto</td>
+                        <td>@producto.Nombre</td>
+                        <td>@producto.Descripcion</td>
+                        <td>$@producto.Precio</td>
+                        <td>@producto.Categoria</td>
+                        <td>@producto.Proveedor</td>
+                        <td>@(producto.EstaActivo ? "Sí" : "No")</td>
+                        <td>
+                            <a class="btn btn-outline-primary" href="/Productos/Details/@producto.ProductoId">
+                                <span class="bi bi-info-circle-fill"></span>
+                            </a>
+                        </td>
 
-        <div class="form-group">
-            <label>Nombre:</label>
-            <InputText @bind-Value="productoActual.Nombre" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.Nombre)" />
-        </div>
-        <div class="form-group">
-            <label>Descripción:</label>
-            <InputText @bind-Value="productoActual.Descripcion" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.Descripcion)" />
-        </div>
-        <div class="form-group">
-            <label>Precio:</label>
-            <InputNumber @bind-Value="productoActual.Precio" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.Precio)" />
-        </div>
-        <div class="form-group">
-            <label>Categoría:</label>
-            <InputText @bind-Value="productoActual.Categoria" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.Categoria)" />
-        </div>
-        <div class="form-group">
-            <label>Código:</label>
-            <InputText @bind-Value="productoActual.CodigoProducto" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.CodigoProducto)" />
-        </div>
-        <div class="form-group">
-            <label>Proveedor:</label>
-            <InputText @bind-Value="productoActual.Proveedor" class="form-control" />
-            <ValidationMessage For="@(() => productoActual.Proveedor)" />
-        </div>
-        <div class="form-group">
-            <label>Activo:</label>
-            <InputCheckbox @bind-Value="productoActual.EstaActivo" />
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-    </EditForm>
-}
+                        <td>
+                            <a class="btn btn-outline-success" href="/Productos/Edit/@producto.ProductoId">
+                                <span class="bi bi-marker-tip"></span>
+                            </a>
+                        </td>
+
+                        <td>
+                            <a class="btn btn-outline-warning" href="/Productos/Delete/@producto.ProductoId">
+                                <span class="bi bi-dash-circle-fill"></span>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10">No hay registros disponibles</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</EditForm>
 
 @code {
-    private List<Productos> productos;
-    private Productos productoActual = new Productos();
-    private bool mostrarFormulario = false;
-    private string valorFiltro;
+
+    public Productos Producto = new Productos();
+
+    public List<Productos> ListaProductos = new List<Productos>();
+
+    private string filtro = "codigoProducto";
+    private string valorFiltro = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarProductos();
+        ListaProductos = await ProductosService.Listar(c => true);
     }
 
-    private async Task CargarProductos()
+    public async Task Guardar()
     {
-        productos = await _productosService.Lista();
+        var guardo = await ProductosService.Guardar(Producto);
     }
 
-    private async Task GuardarProducto()
+    private async Task Buscar()
     {
-        await _productosService.Guardar(productoActual);
-        mostrarFormulario = false;
-        await CargarProductos();
-    }
-
-    private async Task EditarProducto(int id)
-    {
-        productoActual = await _productosService.Buscar(id);
-        mostrarFormulario = true;
-    }
-
-    private async Task ConfirmarEliminar(int id)
-    {
-        bool existe = await _productosService.Existe(id);
-        if (existe)
+        if (valorFiltro.Trim() != "")
         {
-            bool eliminado = await _productosService.Eliminar(id);
-            if (eliminado)
+            if (filtro == "codigoProducto")
             {
-                await CargarProductos();
+                ListaProductos = await ProductosService.Listar(p => p.CodigoProducto.Contains(valorFiltro));
             }
-        }
-    }
-
-    private async Task BuscarProducto()
-    {
-        if (!string.IsNullOrWhiteSpace(valorFiltro))
-        {
-            productos = await _productosService.Lista();
-            productos = productos.Where(p =>
-                p.Nombre.ToLower().Contains(valorFiltro.ToLower()) ||
-                p.Descripcion.ToLower().Contains(valorFiltro.ToLower())).ToList();
+            else if (filtro == "nombre")
+            {
+                ListaProductos = await ProductosService.Listar(p => p.Nombre.Contains(valorFiltro));
+            }
+            else if (filtro == "categoria")
+            {
+                ListaProductos = await ProductosService.Listar(p => p.Categoria == valorFiltro);
+            }
         }
         else
         {
-            await CargarProductos();
+            ListaProductos = await ProductosService.Listar(p => true);
         }
     }
-
-    private void Cancelar()
-    {
-        mostrarFormulario = false;
-    }
 }
+
+

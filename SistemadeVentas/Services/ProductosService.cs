@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SistemadeVentas.DAL;
 using SistemadeVentas.Models;
+using System.Linq.Expressions;
 
 namespace SistemadeVentas.Services
 {
@@ -75,10 +76,13 @@ namespace SistemadeVentas.Services
         {
             return await _context.Productos.FindAsync(id);
         }
-
-        public async Task<List<Productos>> Lista()
+        public async Task<List<Productos>> Listar(Expression<Func<Productos, bool>> criterio)
         {
-            return await _context.Productos.ToListAsync();
+            return await _context.Productos
+                .AsNoTracking()
+                .Where(criterio)
+                .ToListAsync();
+
         }
 
         public async Task<bool> Existe(int id)

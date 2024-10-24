@@ -17,7 +17,7 @@
                     <label for="ProductoId" class="form-label">ProductoId:</label>
                     <div class="input-group">
                         <div style="width: 40%; height: 1em;">
-                            <InputNumber @bind-Value="productoActual.ProductoId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                            <InputNumber @bind-Value="productoActual.ProductoId" class="form-control" style="font-size: 0.8em; background-color: lightgray;" disabled />
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,6 @@
                 <label for="EstaActivo" class="form-label">Activo:</label>
                 <InputCheckbox @bind-Value="productoActual.EstaActivo" />
             </div>
-
         </div>
 
         <div class="card-footer bg-light d-flex justify-content-center mt-3">
@@ -87,10 +86,30 @@
     private Productos productoActual = new Productos();
     private bool existe = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await GenerarNuevoProductoId();
+    }
+
+    private async Task GenerarNuevoProductoId()
+    {
+        // Obtener el ProductoId más alto y sumarle 1
+        var productos = await _productosService.Listar(p => true);
+        if (productos.Any())
+        {
+            productoActual.ProductoId = productos.Max(p => p.ProductoId) + 1;
+        }
+        else
+        {
+            productoActual.ProductoId = 1; // Si no hay productos, empieza en 1
+        }
+    }
+
     public void Nuevo()
     {
         productoActual = new Productos();
         existe = false;
+        GenerarNuevoProductoId();
     }
 
     public async Task Guardar()
@@ -102,5 +121,5 @@
             NavigationManager.NavigateTo("/productos/index"); // Redirigir a la lista de productos después de guardar
         }
     }
-
 }
+
