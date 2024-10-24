@@ -42,7 +42,6 @@
                 <th>Cantidad Disponible</th>
                 <th>Fecha de Ingreso</th>
                 <th>Fecha Última Actualización</th>
-                <th>Ver</th>
                 <th>Editar</th>
                 <th>Eliminar</th>
             </tr>
@@ -59,11 +58,6 @@
                         <td>@inventario.FechaIngreso.ToShortDateString()</td>
                         <td>@inventario.FechaUltimaActualizacion.ToShortDateString()</td>
                         <td>
-                            <a class="btn btn-outline-primary" href="/Inventario/Details/@inventario.InventarioId">
-                                <span class="bi bi-info-circle-fill"></span>
-                            </a>
-                        </td>
-                        <td>
                             <a class="btn btn-outline-success" href="/Inventario/Edit/@inventario.InventarioId">
                                 <span class="bi bi-marker-tip"></span>
                             </a>
@@ -79,7 +73,7 @@
             else
             {
                 <tr>
-                    <td colspan="8">No hay registros disponibles</td>
+                    <td colspan="7">No hay registros disponibles</td>
                 </tr>
             }
         </tbody>

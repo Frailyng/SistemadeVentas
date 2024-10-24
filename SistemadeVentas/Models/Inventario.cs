@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SistemadeVentas.Models
@@ -13,7 +12,7 @@ namespace SistemadeVentas.Models
         [ForeignKey("Producto")] 
         public int ProductoId { get; set; }  
 
-        public Productos Producto { get; set; } 
+        public Productos? Producto { get; set; } 
 
         [Required(ErrorMessage = "La cantidad disponible es obligatoria.")]
         [Range(0, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor o igual a 0.")]

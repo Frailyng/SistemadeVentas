@@ -23,7 +23,7 @@
             @* Seleccionar Producto *@
             <div class="mb-3">
                 <label for="ProductoId" class="form-label">Producto:</label>
-                <InputSelect @bind-Value="inventarioActual.ProductoId" class="form-control">
+                <InputSelect @bind-Value="inventarioActual.ProductoId" class="form-control form-select">
                     <option value="">Seleccione un producto</option>
                     @foreach (var producto in productosDisponibles)
                     {
