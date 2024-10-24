@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using SistemadeVentas.Components;
+using SistemadeVentas.DAL;
 
 namespace SistemadeVentas
 {
@@ -11,6 +13,10 @@ namespace SistemadeVentas
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
+            builder.Services.AddDbContext<Contexto>(Options => Options.UseSqlite(ConStr));
 
             var app = builder.Build();
 
