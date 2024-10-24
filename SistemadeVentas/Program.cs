@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SistemadeVentas.Components;
 using SistemadeVentas.DAL;
+using SistemadeVentas.Services;
 
 namespace SistemadeVentas
 {
@@ -17,6 +18,11 @@ namespace SistemadeVentas
             var ConStr = builder.Configuration.GetConnectionString("ConStr");
 
             builder.Services.AddDbContext<Contexto>(Options => Options.UseSqlite(ConStr));
+
+            builder.Services.AddScoped<ProductosService>();
+            builder.Services.AddScoped<InventarioService>();
+            builder.Services.AddScoped<FacturacionService>();
+
 
             var app = builder.Build();
 
