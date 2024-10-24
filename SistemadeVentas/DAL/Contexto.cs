@@ -9,7 +9,7 @@ public class Contexto : DbContext
 
     public DbSet<Productos> Productos { get; set; }
 
-    public DbSet<Inventario> Inventario { get; set; }
+    public DbSet<Inventario> Inventarios { get; set; }
 
     public DbSet<Facturacion> Facturaciones { get; set; }
 }
