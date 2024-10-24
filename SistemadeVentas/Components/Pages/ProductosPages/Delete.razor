@@ -1,5 +1,100 @@
-﻿<h3>Delete</h3>
+﻿@page "/Productos/Delete"
+@page "/Productos/Delete/{ProductoId:int}"
+@inject ProductosService ProductosService
+@inject NavigationManager navigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Producto</PageTitle>
+
+@if (producto != null)
+{
+    <div class="container">
+        <div class="card shadow-header">
+            <!-- Header -->
+            <div class="card-header bg-primary text-white text-center py-2 rounded">
+                <h3><strong>Eliminar Producto</strong></h3>
+            </div>
+            <div class="card-header">
+                <h3 class="text-danger">¿Estás seguro de que quieres eliminar el producto?</h3>
+            </div>
+            <!-- Body -->
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <h3 class="text-center"><strong>Datos del Producto</strong></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="border-primary border-2 borde">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <ul class="list-unstyled">
+                                                    <li><strong>ProductoId:</strong> @producto.ProductoId</li>
+                                                    <li><strong>Nombre:</strong> @producto.Nombre</li>
+                                                    <li><strong>Descripción:</strong> @producto.Descripcion</li>
+                                                    <li><strong>Precio:</strong> @producto.Precio</li>
+                                                    <li><strong>Categoría:</strong> @producto.Categoria</li>
+                                                    <li><strong>Código Producto:</strong> @producto.CodigoProducto</li>
+                                                    <li><strong>Proveedor:</strong> @producto.Proveedor</li>
+                                                    <li><strong>Activo:</strong> @(producto.EstaActivo ? "Sí" : "No")</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div class="card-footer">
+                <button type="button" class="btn btn-outline-danger" @onclick="EliminarProducto">
+                    <i class="bi bi-trash-fill"></i> Eliminar
+                </button>
+                <button type="button" class="btn btn-outline-primary" @onclick="Volver">
+                    <i class="bi bi-box-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>Producto no encontrado.</p>
+}
 
 @code {
+    [Parameter]
+    public int ProductoId { get; set; }
+    public Productos? producto { get; set; } = new Productos();
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (ProductoId != 0)
+        {
+            producto = await ProductosService.Buscar(ProductoId);
+        }
+    }
+
+    public async Task EliminarProducto()
+    {
+        if (ProductoId == 0 || producto == null)
+        {
+            return;
+        }
+
+        if (await ProductosService.Eliminar(ProductoId))
+        {
+            Volver();
+        }
+    }
+
+    public void Volver()
+    {
+        navigationManager.NavigateTo("/Productos/Index");
+    }
 }

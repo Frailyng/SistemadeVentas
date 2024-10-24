@@ -89,5 +89,19 @@ namespace SistemadeVentas.Services
         {
             return await _context.Productos.AnyAsync(p => p.ProductoId == id);
         }
+
+        public async Task<bool> Existe(string? descripcion, int? productoId = null)
+        {
+            return await _context.Productos
+                .AnyAsync(p => p.Descripcion.Equals(descripcion));
+        }
+
+
+        public async Task<bool> Existe(int productoId, string? descripcion)
+        {
+            //TODO: Unir los dos existe en uno solo para reducir duplicidad de codigo.
+            return await _context.Productos
+                .AnyAsync(p => p.ProductoId != productoId && p.Descripcion.Equals(descripcion));
+        }
     }
 }
