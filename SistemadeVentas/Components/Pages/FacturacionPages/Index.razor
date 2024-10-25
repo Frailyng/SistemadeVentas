@@ -2,77 +2,119 @@
 @inject FacturacionService facturacionService
 @inject NavigationManager NavigationManager
 
-<h3>Facturación</h3>
+<PageTitle>Facturación</PageTitle>
 
-<p>
-    <a href="/Facturacion/Create" class="btn btn-primary">Crear Nueva Factura</a>
-</p>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title">Facturación</h5>
+        </div>
 
-@if (facturas == null)
-{
-    <p><em>Cargando facturas...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nombre Cliente</th>
-                <th>Fecha Factura</th>
-                <th>Total</th>
-                <th>Método de Pago</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var factura in facturas)
-            {
-                <tr>
-                    <td>@factura.NombreCliente</td>
-                    <td>@factura.FechaFactura.ToString("dd/MM/yyyy")</td>
-                    <td>@factura.Total.ToString("C")</td>
-                    <td>@factura.MetodoPago</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" @onclick="() => EditarFactura(factura.FacturaId)">Editar</button>
-                        <button class="btn btn-sm btn-info" @onclick="() => VerDetalles(factura.FacturaId)">Detalles</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => EliminarFactura(factura.FacturaId)">Eliminar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        <div class="card-body">
+            <!-- Filtros de búsqueda y botón Crear -->
+            <div class="mb-3 row align-items-end">
+                <div class="col-md-3">
+                    <label for="filtrarPor" class="form-label">Filtrar por:</label>
+                    <select id="filtrarPor" class="form-select form-select-sm" @bind="Filtro">
+                        <option value="cliente">Cliente</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="valorFiltro" class="form-label">Buscar:</label>
+                    <input type="text" id="valorFiltro" class="form-control form-control-sm" placeholder="Buscar..." @bind="valorFiltro">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-primary btn-sm" type="button" @onclick="Buscar">
+                        <span class="bi bi-search"></span> Buscar
+                    </button>
+                </div>
+                <div class="col-md-2 text-end">
+                    <!-- Botón Crear que lleva a /Facturacion/Create -->
+                    <a href="/Facturacion/Create" class="btn btn-success btn-sm">
+                        <span class="bi bi-plus-square"></span> Crear
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tabla de Facturas -->
+            <table class="table table-light table-bordered">
+                <thead class="table table-striped text-center text-white bg-primary">
+                    <tr>
+                        <th>FacturaID</th>
+                        <th>Nombre Cliente</th>
+                        <th>Fecha Factura</th>
+                        <th>Total</th>
+                        <th>Método de Pago</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (facturas.Any())
+                    {
+                        foreach (var factura in facturas)
+                        {
+                            <tr>
+                                <td class="text-center">@factura.FacturaId</td>
+                                <td class="text-center">@factura.NombreCliente</td>
+                                <td class="text-center">@factura.FechaFactura.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">@factura.Total.ToString("C")</td>
+                                <td class="text-center">@factura.MetodoPago</td>
+                                <td class="text-center">
+                                    <a href="/Facturacion/Edit/@factura.FacturaId" class="btn bi bi-pencil-square"></a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/Facturacion/Delete/@factura.FacturaId" class="btn bi bi-trash"></a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">No hay Facturas disponibles</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer space-between">
+            <label>Cantidad: @facturas.Count()</label>
+            <label>Total Facturado: @facturas.Sum(p => p.Total).ToString("C")</label>
+        </div>
+    </div>
+</div>
 
 @code {
-    private List<Facturacion> facturas;
+    public List<Facturacion> facturas = new List<Facturacion>();
+    public string Filtro { get; set; } = string.Empty;
+    public string valorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        facturas = await facturacionService.Lista();
+        facturas = await facturacionService.Listar(c => true);
     }
 
-    private void CrearNuevaFactura()
+    public async Task Buscar()
     {
-        // Redirigir a la página de creación de factura
-        NavigationManager.NavigateTo("/Facturacion/Create");
+        if (!string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            if (Filtro == "cliente")
+            {
+                facturas = await facturacionService.Listar(p => p.NombreCliente.ToLower().Contains(valorFiltro.ToLower()));
+            }
+        }
+        else
+        {
+            facturas = await facturacionService.Listar(p => true);
+        }
     }
 
-    private void EditarFactura(int facturaId)
+    private async Task Restablecer()
     {
-        // Redirigir a la página de edición de la factura
-        NavigationManager.NavigateTo($"/Facturacion/Edit/{facturaId}");
-    }
-
-    private void VerDetalles(int facturaId)
-    {
-        // Redirigir a la página de detalles de la factura
-        NavigationManager.NavigateTo($"/Facturacion/Details/{facturaId}");
-    }
-
-    private async Task EliminarFactura(int facturaId)
-    {
-        // Lógica para eliminar la factura
-        await facturacionService.Eliminar(facturaId);
-        facturas = await facturacionService.Lista(); // Actualizar la lista
+        facturas = await facturacionService.Listar(c => true);
+        Filtro = string.Empty;
+        valorFiltro = string.Empty;
     }
 }

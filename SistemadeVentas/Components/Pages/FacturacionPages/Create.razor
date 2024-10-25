@@ -34,7 +34,7 @@
 
     <div class="form-group">
         <label>Detalles de Factura</label>
-        @foreach (var detalle in nuevaFactura.DetallesFactura)
+        @foreach (var detalle in nuevaFactura.DetalleFactura)
         {
             <div>
                 <label>Producto ID</label>
@@ -56,7 +56,7 @@
         private Facturacion nuevaFactura = new Facturacion
         {
             FechaFactura = DateTime.Now,
-            DetallesFactura = new List<DetalleFactura>()
+            DetalleFactura = new List<DetalleFactura>()
         };
 
         private async Task CrearFactura()
@@ -81,7 +81,7 @@
 
     private void AgregarDetalle()
     {
-        nuevaFactura.DetallesFactura.Add(new DetalleFactura());
+        nuevaFactura.DetalleFactura.Add(new DetalleFactura());
     }
 
     }
