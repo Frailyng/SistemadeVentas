@@ -1,0 +1,99 @@
+﻿@page "/Facturacion/Delete"
+@page "/Facturacion/Delete/{FacturaId:int}"
+@inject FacturacionService FacturacionService
+@inject NavigationManager navigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Factura</PageTitle>
+
+<div class="container">
+    <div class="card shadow-header">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white text-center py-2 rounded">
+            <h3><strong>Eliminar Factura</strong></h3>
+        </div>
+        <div class="card-header">
+            <h3 class="text-danger">¿Estás seguro de que quieres eliminar la factura?</h3>
+        </div>
+        <!-- Body -->
+        @if (factura != null)
+        {
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <h3 class="text-center"><strong>Datos de la Factura</strong></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="border-primary border-2 borde">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <ul class="list-unstyled">
+                                                    <li><strong>FacturaId:</strong> @factura.FacturaId</li>
+                                                    <li><strong>Cliente:</strong> @factura.NombreCliente</li>
+                                                    <li><strong>Fecha de Factura:</strong> @factura.FechaFactura.ToShortDateString()</li>
+                                                    <li><strong>Monto Total:</strong> @factura.Total.ToString("C")</li>
+                                                    <li><strong>Estado:</strong> @factura.Estado</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <strong>No se encontró la factura.</strong>
+            </div>
+        }
+        <!-- Footer -->
+        <div class="card-footer">
+            <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">
+                <i class="bi bi-trash-fill"></i> Eliminar
+            </button>
+            <button type="button" class="btn btn-outline-primary" @onclick="Volver">
+                <i class="bi bi-box-arrow-left"></i> Volver
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int FacturaId { get; set; }
+    public Facturacion? factura { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (FacturaId != 0)
+        {
+            factura = await FacturacionService.Buscar(FacturaId);
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        if (factura != null)
+        {
+            bool eliminado = await FacturacionService.Eliminar(FacturaId);
+
+            if (eliminado)
+            {
+                navigationManager.NavigateTo("/Facturacion/Index");
+            }
+        }
+    }
+
+    public void Volver()
+    {
+        navigationManager.NavigateTo("/Facturacion/Index");
+    }
+}

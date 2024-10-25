@@ -56,7 +56,7 @@ namespace SistemadeVentas.Services
                 .FirstOrDefaultAsync(r => r.FacturaId == facturaid);
         }
 
-        public async Task<bool> ELiminar(int facturaId)
+        public async Task<bool> Eliminar(int facturaId)
         {
             return await contexto.Facturaciones.Include(c => c.DetalleFactura)
                 .Where(c => c.FacturaId == facturaId)
