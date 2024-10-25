@@ -13,5 +13,5 @@ public class Contexto : DbContext
 
     public DbSet<Facturacion> Facturaciones { get; set; }
 
-    public DbSet<DetalleFactura> detalleFactura { get; set; }
+    public DbSet<DetalleFactura> DetalleFactura { get; set; }
 }

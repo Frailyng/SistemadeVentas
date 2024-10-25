@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SistemadeVentas.DAL;
@@ -7,81 +8,70 @@ using SistemadeVentas.Models;
 
 namespace SistemadeVentas.Services
 {
-    public class FacturacionService
+    public class FacturacionService(Contexto contexto)
     {
-        private readonly Contexto _context;
 
-        public FacturacionService(Contexto context)
+        public async Task<bool> Existe(int facturacionid)
         {
-            _context = context;
+            return await contexto.Facturaciones.AnyAsync(c => c.FacturaId == facturacionid);
         }
 
-        public async Task<bool> Guardar(Facturacion facturacion)
+        public async Task<bool> Insertar(Facturacion factura)
         {
-            if (facturacion.FacturaId == 0)
-                return await Insertar(facturacion);
+            contexto.Facturaciones.Add(factura);
+            await AfectarFacturas(factura.DetalleFactura.ToArray());
+            return await contexto.SaveChangesAsync() > 0;
+        }
+
+        public async Task AfectarFacturas(DetalleFactura[] detalle)
+        {
+            foreach (var item in detalle)
+            {
+                var prestamo = await contexto.Productos.SingleAsync(p => p.ProductoId == item.ProductoId);
+            }
+        }
+
+        public async Task<bool> Modificar(Facturacion factura)
+        {
+            contexto.Update(factura);
+            return await contexto.SaveChangesAsync() > 0;
+
+        }
+
+        public async Task<bool> Guardar(Facturacion factura)
+        {
+            if (!await Existe(factura.FacturaId))
+            {
+                return await Insertar(factura);
+            }
             else
-                return await Modificar(facturacion);
-        }
-
-        public async Task<bool> Insertar(Facturacion facturacion)
-        {
-            try
             {
-                await _context.Facturaciones.AddAsync(facturacion);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
+                return await Modificar(factura);
             }
         }
 
-        public async Task<bool> Modificar(Facturacion facturacion)
+        //Buscar
+        public async Task<Facturacion> Buscar(int facturaid)
         {
-            try
-            {
-                _context.Facturaciones.Update(facturacion);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return await contexto.Facturaciones
+                .Include(d => d.DetalleFactura)
+                .FirstOrDefaultAsync(r => r.FacturaId == facturaid);
         }
 
-        public async Task<bool> Eliminar(int id)
+        public async Task<bool> ELiminar(int facturaId)
         {
-            var facturacion = await _context.Facturaciones.FindAsync(id);
-            if (facturacion == null) return false;
-
-            try
-            {
-                _context.Facturaciones.Remove(facturacion);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return await contexto.Facturaciones.Include(c => c.DetalleFactura)
+                .Where(c => c.FacturaId == facturaId)
+                .ExecuteDeleteAsync() > 0;
         }
-
-        public async Task<Facturacion> Buscar(int id)
+        // Listar
+        public async Task<List<Facturacion>> Listar(Expression<Func<Facturacion, bool>> criterio)
         {
-            return await _context.Facturaciones.FindAsync(id);
-        }
-
-        public async Task<List<Facturacion>> Lista()
-        {
-            return await _context.Facturaciones.Include(f => f.DetallesFactura).ToListAsync();
-        }
-
-        public async Task<bool> Existe(int id)
-        {
-            return await _context.Facturaciones.AnyAsync(f => f.FacturaId == id);
+            return await contexto.Facturaciones
+                .Include(d => d.DetalleFactura)
+                .Where(criterio)
+                 .AsNoTracking()
+                .ToListAsync();
         }
     }
 }
