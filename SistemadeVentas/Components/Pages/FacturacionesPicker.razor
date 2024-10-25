@@ -27,13 +27,13 @@
     public List<Productos> Productos { get; set; } = [];
 
     [Parameter]
-    public EventCallback<(Productos Producto, double Quantity)> OnProductoSelected { get; set; } // Event for  selection
+    public EventCallback<(Productos Producto, decimal Quantity)> OnProductoSelected { get; set; } // Event for  selection
 
     [Parameter]
     public int ProductoId { get; set; }
 
     [Parameter]
-    public double Valor { get; set; }
+    public decimal Valor { get; set; }
 
     private string? ErrorMessage { get; set; } = null;
 

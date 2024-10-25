@@ -1,87 +1,150 @@
 ﻿@page "/Facturacion/Create"
 @inject FacturacionService facturacionService
+@inject ProductosService ProductosService
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
-<h3>Crear Nueva Factura</h3>
-
-<EditForm Model="nuevaFactura" OnValidSubmit="CrearFactura">
+<PageTitle>Create</PageTitle>
+<EditForm Model="Factura" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
-    <div class="form-group">
-        <label for="nombreCliente">Nombre del Cliente</label>
-        <InputText id="nombreCliente" class="form-control" @bind-Value="nuevaFactura.NombreCliente" />
-        <ValidationMessage For="@(() => nuevaFactura.NombreCliente)" />
-    </div>
-
-    <div class="form-group">
-        <label for="fechaFactura">Fecha de Factura</label>
-        <InputDate id="fechaFactura" class="form-control" @bind-Value="nuevaFactura.FechaFactura" />
-        <ValidationMessage For="@(() => nuevaFactura.FechaFactura)" />
-    </div>
-
-    <div class="form-group">
-        <label for="total">Total</label>
-        <InputNumber id="total" class="form-control" @bind-Value="nuevaFactura.Total" />
-        <ValidationMessage For="@(() => nuevaFactura.Total)" />
-    </div>
-
-    <div class="form-group">
-        <label for="metodoPago">Método de Pago</label>
-        <InputText id="metodoPago" class="form-control" @bind-Value="nuevaFactura.MetodoPago" />
-        <ValidationMessage For="@(() => nuevaFactura.MetodoPago)" />
-    </div>
-
-    <div class="form-group">
-        <label>Detalles de Factura</label>
-        @foreach (var detalle in nuevaFactura.DetalleFactura)
-        {
-            <div>
-                <label>Producto ID</label>
-                <InputNumber class="form-control" @bind-Value="detalle.ProductoId" />
-                <label>Cantidad</label>
-                <InputNumber class="form-control" @bind-Value="detalle.Cantidad" />
-                <label>Precio Unitario</label>
-                <InputNumber class="form-control" @bind-Value="detalle.PrecioUnitario" />
+    <div class="container">
+        <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+            <div class="card-header bg-primary text-white text-center">
+                <h3> <i class="fas fa-clipboard-list"></i> Factura</h3>
             </div>
-        }
-        <button type="button" class="btn btn-secondary" @onclick="AgregarDetalle">Agregar Producto</button>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Crear</button>
-    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+            <div class="card-body">
+
+                <!-- Factura Id -->
+                <div class="mb-3">
+                    <label for="FacturaId" class="form-label"><strong>FacturaId:</strong></label>
+                    <InputNumber @bind-Value="Factura.FacturaId" class="form-control" readonly> </InputNumber>
+                </div>
+
+                <!-- Nombre del Cliente -->
+                <div class="mb-3">
+                    <label for="NombreCliente" class="form-label"><strong>Nombre del Cliente:</strong></label>
+                    <InputText @bind-Value="Factura.NombreCliente" class="form-control" required />
+                    <ValidationMessage For="@(() => Factura.NombreCliente)" />
+                </div>
+
+                <!-- Fecha -->
+                <div class="mb-3">
+                    <label for="Fecha" class="form-label"><strong>Fecha:</strong></label>
+                    <InputDate @bind-Value="Factura.FechaFactura" class="form-control"> </InputDate>
+                </div>
+
+                <!-- Método de Pago -->
+                <div class="mb-3">
+                    <label for="MetodoPago" class="form-label"><strong>Método de Pago:</strong></label>
+                    <InputSelect @bind-Value="Factura.MetodoPago" class="form-select" required>
+                        <option value="">Seleccione un método de pago</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Factura.MetodoPago)" />
+                </div>
+
+                <!-- Búsqueda de Producto -->
+                <div class="mb-3">
+                    <label for="BuscarProducto" class="form-label"><strong>Buscar Producto:</strong></label>
+                    <InputText @bind-Value="BusquedaProducto" class="form-control" placeholder="Ingrese el nombre del producto" />
+                    <button type="button" class="btn btn-primary mt-2" @onclick="BuscarProducto">Buscar</button>
+                </div>
+
+                <!-- Tabla de Productos -->
+                <div class="border border-success p-3 mt-3">
+                    <h5>Detalles de la Factura</h5>
+                    <hr />
+                    <table class="table table-light">
+                        <thead class="table table-striped">
+                            <tr class="Text-center">
+                                <td>Producto</td>
+                                <td>Cantidad</td>
+                                <td>Precio Unitario</td>
+                                <td>Total</td>
+                                <td>Remover</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in Factura.DetalleFactura)
+                            {
+                                <tr>
+                                    <td>@detalle.Producto.Nombre</td>
+                                    <td>
+                                        <InputNumber @bind-Value="detalle.Cantidad" class="form-control" @onchange="(e) => CalcularTotal(detalle)" />
+                                    </td>
+                                    <td>@detalle.PrecioUnitario</td>
+                                    <td>@(detalle.Cantidad * detalle.PrecioUnitario)</td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger bi bi-trash"
+                                                @onclick="() => RemoverDetalle(detalle)"></button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <hr />
+                </div>
+
+                <!-- Total -->
+                <div class="row">
+                    <div class="col-6 offset-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Subtotal</strong></label>
+                            <label class="form-control text-end"><strong>@Factura.Total</strong></label>
+                            <ValidationMessage For="(() => Factura.Total)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer text-center mt-2">
+                <a href="/Facturacion/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
 </EditForm>
 
-    @code {
-        private Facturacion nuevaFactura = new Facturacion
-        {
-            FechaFactura = DateTime.Now,
-            DetalleFactura = new List<DetalleFactura>()
-        };
+@code {
+    public Facturacion Factura { get; set; } = new Facturacion();
+    public string BusquedaProducto { get; set; }
+    public List<Productos> ListaProductos { get; set; } = new();
 
-        private async Task CrearFactura()
-        {
-            var guardado = await facturacionService.Guardar(nuevaFactura); // Llamada al servicio
+    protected override async Task OnInitializedAsync()
+    {
+        Factura.FechaFactura = DateTime.Now;
+    }
 
-            if (guardado)
-            {
-                NavigationManager.NavigateTo("/Facturacion/Index");
-            }
-            else
-            {
-                // Mostrar mensaje de error si algo sale mal al guardar la factura
-                Console.WriteLine("Error al guardar la factura.");
-            }
+    private async Task BuscarProducto()
+    {
+        if (!string.IsNullOrWhiteSpace(BusquedaProducto))
+        {
+            ListaProductos = await ProductosService.Listar(p => p.Nombre.Contains(BusquedaProducto));
         }
+    }
 
-    private void Cancelar()
+    public void CalcularTotal(DetalleFactura detalle)
     {
-        NavigationManager.NavigateTo("/Facturacion/Index");
+        detalle.Subtotal = detalle.Cantidad * detalle.PrecioUnitario;
+        Factura.Total = Factura.DetalleFactura.Sum(d => d.Subtotal);
     }
 
-    private void AgregarDetalle()
+    public void RemoverDetalle(DetalleFactura detalle)
     {
-        nuevaFactura.DetalleFactura.Add(new DetalleFactura());
+        Factura.DetalleFactura.Remove(detalle);
+        Factura.Total = Factura.DetalleFactura.Sum(d => d.Subtotal);
     }
 
+    public async Task Guardar()
+    {
+        var guardo = await facturacionService.Guardar(Factura);
+        if (guardo)
+        {
+            NavigationManager.NavigateTo("/Facturacion/Index");
+        }
     }
+}
