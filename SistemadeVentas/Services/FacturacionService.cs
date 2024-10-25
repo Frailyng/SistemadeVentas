@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SistemadeVentas.DAL;
 using SistemadeVentas.Models;
@@ -27,10 +25,10 @@ namespace SistemadeVentas.Services
         {
             foreach (var item in detalle)
             {
-                var prestamo = await contexto.Productos.SingleAsync(p => p.ProductoId == item.ProductoId);
+                var producto = await contexto.Productos.SingleAsync(p => p.ProductoId == item.ProductoId);
+               
             }
         }
-
         public async Task<bool> Modificar(Facturacion factura)
         {
             contexto.Update(factura);

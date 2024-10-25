@@ -6,7 +6,7 @@ namespace SistemadeVentas.Models
     public class Productos
     {
         [Key]
-        public int ProductoId { get; set; }  // Identificador único del producto
+        public int ProductoId { get; set; } 
 
         [Required(ErrorMessage = "El nombre del producto es obligatorio.")]
         [StringLength(100, ErrorMessage = "El nombre no puede exceder los 100 caracteres.")]

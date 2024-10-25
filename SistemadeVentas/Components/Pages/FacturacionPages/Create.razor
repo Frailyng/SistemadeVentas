@@ -1,6 +1,6 @@
 ﻿@page "/Facturacion/Create"
 @inject FacturacionService facturacionService
-@inject ProductosService ProductosService
+@inject ProductosService productosService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
@@ -46,11 +46,42 @@
                     <ValidationMessage For="@(() => Factura.MetodoPago)" />
                 </div>
 
-                <!-- Búsqueda de Producto -->
-                <div class="mb-3">
-                    <label for="BuscarProducto" class="form-label"><strong>Buscar Producto:</strong></label>
-                    <InputText @bind-Value="BusquedaProducto" class="form-control" placeholder="Ingrese el nombre del producto" />
-                    <button type="button" class="btn btn-primary mt-2" @onclick="BuscarProducto">Buscar</button>
+                <!-- Selección de Categoría -->
+                <div class="mb-3 row">
+                    <div class="col-md-6">
+                        <label for="Categoria" class="form-label"><strong>Categoría:</strong></label>
+                        <InputSelect @bind-Value="CategoriaSeleccionadaId" class="form-select">
+                            <option value="">Seleccione una categoría</option>
+                            @foreach (var categoria in ListaCategoriasUnicas)
+                            {
+                                <option value="@categoria">@categoria</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="button" class="btn btn-info" @onclick="BuscarProductosPorCategoria">Buscar Productos</button>
+                    </div>
+                </div>
+
+                <!-- Selección de Producto y Cantidad -->
+                <div class="mb-3 row">
+                    <div class="col-md-6">
+                        <label for="Producto" class="form-label"><strong>Producto:</strong></label>
+                        <InputSelect @bind-Value="ProductoSeleccionadoId" class="form-select">
+                            <option value="">Seleccione un producto</option>
+                            @foreach (var producto in ListaProductos)
+                            {
+                                <option value="@producto.ProductoId">@producto.Nombre - @producto.Precio</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="CantidadProducto" class="form-label"><strong>Cantidad:</strong></label>
+                        <InputNumber @bind-Value="CantidadProducto" class="form-control" min="1" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-success" @onclick="AgregarProducto">Agregar</button>
+                    </div>
                 </div>
 
                 <!-- Tabla de Productos -->
@@ -59,7 +90,7 @@
                     <hr />
                     <table class="table table-light">
                         <thead class="table table-striped">
-                            <tr class="Text-center">
+                            <tr class="text-center">
                                 <td>Producto</td>
                                 <td>Cantidad</td>
                                 <td>Precio Unitario</td>
@@ -72,9 +103,7 @@
                             {
                                 <tr>
                                     <td>@detalle.Producto.Nombre</td>
-                                    <td>
-                                        <InputNumber @bind-Value="detalle.Cantidad" class="form-control" @onchange="(e) => CalcularTotal(detalle)" />
-                                    </td>
+                                    <td>@detalle.Cantidad</td>
                                     <td>@detalle.PrecioUnitario</td>
                                     <td>@(detalle.Cantidad * detalle.PrecioUnitario)</td>
                                     <td>
@@ -110,41 +139,119 @@
 </EditForm>
 
 @code {
-    public Facturacion Factura { get; set; } = new Facturacion();
-    public string BusquedaProducto { get; set; }
+   public Facturacion Factura { get; set; } = new Facturacion();
+    public DetalleFactura DetalleFactura { get; set; } = new();
+    public int ProductoSeleccionadoId { get; set; }
+    public int CantidadProducto { get; set; } = 1; // Cantidad por defecto 1
+    public string CategoriaSeleccionadaId { get; set; }
     public List<Productos> ListaProductos { get; set; } = new();
+    public List<string> ListaCategoriasUnicas { get; set; } = new();
+    public List<DetalleFactura> ListaDetallesFactura { get; set; } = new(); // Lista de detalles de factura
+    private string? ErrorMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        Factura.DetalleFactura = new List<DetalleFactura>();
+        // Cargar todos los productos
+        ListaProductos = await productosService.Listar(p => true);
+
+        // Extraer las categorías únicas de la lista de productos
+        ListaCategoriasUnicas = ListaProductos
+            .Select(p => p.Categoria)
+            .Distinct()
+            .ToList();
+
         Factura.FechaFactura = DateTime.Now;
     }
 
-    private async Task BuscarProducto()
+    private async Task BuscarProductosPorCategoria()
     {
-        if (!string.IsNullOrWhiteSpace(BusquedaProducto))
+        if (!string.IsNullOrEmpty(CategoriaSeleccionadaId))
         {
-            ListaProductos = await ProductosService.Listar(p => p.Nombre.Contains(BusquedaProducto));
+            // Filtrar los productos según la categoría seleccionada
+            ListaProductos = await productosService.Listar(p => p.Categoria == CategoriaSeleccionadaId);
+        }
+        else
+        {
+            // Si no se selecciona ninguna categoría, se pueden cargar todos los productos
+            ListaProductos = await productosService.Listar(p => true);
         }
     }
 
-    public void CalcularTotal(DetalleFactura detalle)
+    public void CalcularTotal()
     {
-        detalle.Subtotal = detalle.Cantidad * detalle.PrecioUnitario;
         Factura.Total = Factura.DetalleFactura.Sum(d => d.Subtotal);
     }
 
     public void RemoverDetalle(DetalleFactura detalle)
     {
         Factura.DetalleFactura.Remove(detalle);
-        Factura.Total = Factura.DetalleFactura.Sum(d => d.Subtotal);
+        CalcularTotal(); // Actualiza el total después de eliminar un detalle
+    }
+
+    public void AgregarProducto()
+    {
+        if (ProductoSeleccionadoId > 0 && CantidadProducto > 0)
+        {
+            var producto = ListaProductos.FirstOrDefault(p => p.ProductoId == ProductoSeleccionadoId);
+            if (producto != null)
+            {
+                // Verificar si el producto ya existe en los detalles de la factura
+                var detalleExistente = Factura.DetalleFactura
+                    .FirstOrDefault(d => d.ProductoId == producto.ProductoId);
+
+                if (detalleExistente != null)
+                {
+                    // Si el producto ya existe, solo aumentar la cantidad y recalcular el subtotal
+                    detalleExistente.Cantidad += CantidadProducto;
+                    detalleExistente.Subtotal = detalleExistente.Cantidad * detalleExistente.PrecioUnitario;
+                }
+                else
+                {
+                    // Si el producto no existe, agregar un nuevo detalle
+                    var detalle = new DetalleFactura
+                        {
+                            DetalleFacturaId = Factura.DetalleFactura.Count + 1, // Auto incrementar ID
+                            ProductoId = producto.ProductoId,
+                            Producto = producto,
+                            Cantidad = CantidadProducto,
+                            PrecioUnitario = producto.Precio,
+                            Subtotal = CantidadProducto * producto.Precio
+                        };
+
+                    Factura.DetalleFactura.Add(detalle);
+                }
+
+                // Recalcular el total de la factura
+                CalcularTotal();
+            }
+        }
     }
 
     public async Task Guardar()
     {
-        var guardo = await facturacionService.Guardar(Factura);
-        if (guardo)
+        try
         {
-            NavigationManager.NavigateTo("/Facturacion/Index");
+            // Asignar la lista de detalles al objeto de factura
+            Factura.DetalleFactura = ListaDetallesFactura;
+
+            // Guardar la factura
+            var guardo = await facturacionService.Guardar(Factura);
+            if (guardo)
+            {
+                // Limpiar los campos y la lista de detalles después de guardar
+                Factura = new Facturacion(); // Reiniciar la factura
+                ListaDetallesFactura.Clear(); // Limpiar detalles
+                NavigationManager.NavigateTo("/Facturacion/Index");
+            }
+            else
+            {
+                ErrorMessage = "Error al guardar la factura.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
         }
     }
 }

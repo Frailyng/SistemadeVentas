@@ -140,7 +140,7 @@ namespace SistemadeVentas.Migrations
             modelBuilder.Entity("SistemadeVentas.Models.DetalleFactura", b =>
                 {
                     b.HasOne("SistemadeVentas.Models.Facturacion", null)
-                        .WithMany("DetallesFactura")
+                        .WithMany("DetalleFactura")
                         .HasForeignKey("FacturacionFacturaId");
 
                     b.HasOne("SistemadeVentas.Models.Productos", "Producto")
@@ -165,7 +165,7 @@ namespace SistemadeVentas.Migrations
 
             modelBuilder.Entity("SistemadeVentas.Models.Facturacion", b =>
                 {
-                    b.Navigation("DetallesFactura");
+                    b.Navigation("DetalleFactura");
                 });
 #pragma warning restore 612, 618
         }
