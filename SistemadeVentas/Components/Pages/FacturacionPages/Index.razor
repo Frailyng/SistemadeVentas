@@ -1,5 +1,78 @@
-﻿<h3>Index</h3>
+﻿@page "/Facturacion/Index"
+@inject FacturacionService facturacionService
+@inject NavigationManager NavigationManager
+
+<h3>Facturación</h3>
+
+<p>
+    <a href="/Facturacion/Create" class="btn btn-primary">Crear Nueva Factura</a>
+</p>
+
+@if (facturas == null)
+{
+    <p><em>Cargando facturas...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre Cliente</th>
+                <th>Fecha Factura</th>
+                <th>Total</th>
+                <th>Método de Pago</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.NombreCliente</td>
+                    <td>@factura.FechaFactura.ToString("dd/MM/yyyy")</td>
+                    <td>@factura.Total.ToString("C")</td>
+                    <td>@factura.MetodoPago</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditarFactura(factura.FacturaId)">Editar</button>
+                        <button class="btn btn-sm btn-info" @onclick="() => VerDetalles(factura.FacturaId)">Detalles</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => EliminarFactura(factura.FacturaId)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
+    private List<Facturacion> facturas;
 
+    protected override async Task OnInitializedAsync()
+    {
+        facturas = await facturacionService.Lista();
+    }
+
+    private void CrearNuevaFactura()
+    {
+        // Redirigir a la página de creación de factura
+        NavigationManager.NavigateTo("/Facturacion/Create");
+    }
+
+    private void EditarFactura(int facturaId)
+    {
+        // Redirigir a la página de edición de la factura
+        NavigationManager.NavigateTo($"/Facturacion/Edit/{facturaId}");
+    }
+
+    private void VerDetalles(int facturaId)
+    {
+        // Redirigir a la página de detalles de la factura
+        NavigationManager.NavigateTo($"/Facturacion/Details/{facturaId}");
+    }
+
+    private async Task EliminarFactura(int facturaId)
+    {
+        // Lógica para eliminar la factura
+        await facturacionService.Eliminar(facturaId);
+        facturas = await facturacionService.Lista(); // Actualizar la lista
+    }
 }

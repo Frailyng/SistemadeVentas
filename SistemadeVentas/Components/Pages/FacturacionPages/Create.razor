@@ -1,5 +1,87 @@
-﻿<h3>Create</h3>
+﻿@page "/Facturacion/Create"
+@inject FacturacionService facturacionService
+@inject NavigationManager NavigationManager
 
-@code {
+<h3>Crear Nueva Factura</h3>
 
-}
+<EditForm Model="nuevaFactura" OnValidSubmit="CrearFactura">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="nombreCliente">Nombre del Cliente</label>
+        <InputText id="nombreCliente" class="form-control" @bind-Value="nuevaFactura.NombreCliente" />
+        <ValidationMessage For="@(() => nuevaFactura.NombreCliente)" />
+    </div>
+
+    <div class="form-group">
+        <label for="fechaFactura">Fecha de Factura</label>
+        <InputDate id="fechaFactura" class="form-control" @bind-Value="nuevaFactura.FechaFactura" />
+        <ValidationMessage For="@(() => nuevaFactura.FechaFactura)" />
+    </div>
+
+    <div class="form-group">
+        <label for="total">Total</label>
+        <InputNumber id="total" class="form-control" @bind-Value="nuevaFactura.Total" />
+        <ValidationMessage For="@(() => nuevaFactura.Total)" />
+    </div>
+
+    <div class="form-group">
+        <label for="metodoPago">Método de Pago</label>
+        <InputText id="metodoPago" class="form-control" @bind-Value="nuevaFactura.MetodoPago" />
+        <ValidationMessage For="@(() => nuevaFactura.MetodoPago)" />
+    </div>
+
+    <div class="form-group">
+        <label>Detalles de Factura</label>
+        @foreach (var detalle in nuevaFactura.DetallesFactura)
+        {
+            <div>
+                <label>Producto ID</label>
+                <InputNumber class="form-control" @bind-Value="detalle.ProductoId" />
+                <label>Cantidad</label>
+                <InputNumber class="form-control" @bind-Value="detalle.Cantidad" />
+                <label>Precio Unitario</label>
+                <InputNumber class="form-control" @bind-Value="detalle.PrecioUnitario" />
+            </div>
+        }
+        <button type="button" class="btn btn-secondary" @onclick="AgregarDetalle">Agregar Producto</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+</EditForm>
+
+    @code {
+        private Facturacion nuevaFactura = new Facturacion
+        {
+            FechaFactura = DateTime.Now,
+            DetallesFactura = new List<DetalleFactura>()
+        };
+
+        private async Task CrearFactura()
+        {
+            var guardado = await facturacionService.Guardar(nuevaFactura); // Llamada al servicio
+
+            if (guardado)
+            {
+                NavigationManager.NavigateTo("/Facturacion/Index");
+            }
+            else
+            {
+                // Mostrar mensaje de error si algo sale mal al guardar la factura
+                Console.WriteLine("Error al guardar la factura.");
+            }
+        }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/Facturacion/Index");
+    }
+
+    private void AgregarDetalle()
+    {
+        nuevaFactura.DetallesFactura.Add(new DetalleFactura());
+    }
+
+    }

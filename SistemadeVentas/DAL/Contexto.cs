@@ -12,4 +12,6 @@ public class Contexto : DbContext
     public DbSet<Inventario> Inventarios { get; set; }
 
     public DbSet<Facturacion> Facturaciones { get; set; }
+
+    public DbSet<DetalleFactura> detalleFactura { get; set; }
 }

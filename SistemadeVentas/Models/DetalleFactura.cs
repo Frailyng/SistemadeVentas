@@ -6,23 +6,23 @@ namespace SistemadeVentas.Models
     public class DetalleFactura
     {
         [Key]
-        public int DetalleFacturaId { get; set; }  // Identificador único del detalle de la factura
-
+        public int DetalleFacturaId { get; set; }
         [Required(ErrorMessage = "El producto es obligatorio.")]
-        [ForeignKey("Producto")]  // Relación con la tabla de Productos
-        public int ProductoId { get; set; }  // ID del producto vendido
 
-        public Productos Producto { get; set; }  // Referencia al producto
+        public int ProductoId { get; set; }
 
         [Required(ErrorMessage = "La cantidad vendida es obligatoria.")]
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor que 0.")]
-        public int Cantidad { get; set; }  // Cantidad vendida del producto
+        public int Cantidad { get; set; }
 
         [Required(ErrorMessage = "El precio unitario es obligatorio.")]
         [Range(0.01, 10000.00, ErrorMessage = "El precio unitario debe ser mayor que 0.")]
-        public decimal PrecioUnitario { get; set; }  // Precio unitario del producto
+        public decimal PrecioUnitario { get; set; }
 
         [Required(ErrorMessage = "El subtotal es obligatorio.")]
-        public decimal Subtotal { get; set; }  // Subtotal (Cantidad * PrecioUnitario)
+        public decimal Subtotal { get; set; }
+
+        [ForeignKey("ProductoId")]
+        public virtual Productos Producto { get; set; } = null!;
     }
 }
