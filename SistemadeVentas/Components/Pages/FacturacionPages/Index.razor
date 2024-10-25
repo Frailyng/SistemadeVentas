@@ -44,7 +44,7 @@
                         <th>Nombre Cliente</th>
                         <th>Fecha Factura</th>
                         <th>Total</th>
-                        <th>Método de Pago</th>
+                        <th>Estado de la Factura</th>
                         <th>Editar</th>
                         <th>Eliminar</th>
                     </tr>
@@ -59,7 +59,7 @@
                                 <td class="text-center">@factura.NombreCliente</td>
                                 <td class="text-center">@factura.FechaFactura.ToString("dd/MM/yyyy")</td>
                                 <td class="text-center">@factura.Total.ToString("C")</td>
-                                <td class="text-center">@factura.MetodoPago</td>
+                                <td class="text-center">@factura.Estado</td>
                                 <td class="text-center">
                                     <a href="/Facturacion/Edit/@factura.FacturaId" class="btn bi bi-pencil-square"></a>
                                 </td>

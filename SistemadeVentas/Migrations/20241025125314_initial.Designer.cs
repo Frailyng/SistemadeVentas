@@ -11,8 +11,8 @@ using SistemadeVentas.DAL;
 namespace SistemadeVentas.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20241025052025_Inicial")]
-    partial class Inicial
+    [Migration("20241025125314_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,11 +56,11 @@ namespace SistemadeVentas.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("FechaFactura")
+                    b.Property<string>("Estado")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MetodoPago")
-                        .IsRequired()
+                    b.Property<DateTime>("FechaFactura")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NombreCliente")
@@ -138,6 +138,118 @@ namespace SistemadeVentas.Migrations
                     b.HasKey("ProductoId");
 
                     b.ToTable("Productos");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductoId = 1,
+                            Categoria = "Herramientas",
+                            CodigoProducto = "H001",
+                            Descripcion = "Martillo de acero de 500g",
+                            EstaActivo = true,
+                            Nombre = "Martillo de acero",
+                            Precio = 15.99m,
+                            Proveedor = "Ferretería A"
+                        },
+                        new
+                        {
+                            ProductoId = 2,
+                            Categoria = "Herramientas",
+                            CodigoProducto = "H002",
+                            Descripcion = "Destornillador Phillips de acero inoxidable",
+                            EstaActivo = true,
+                            Nombre = "Destornillador Phillips",
+                            Precio = 5.50m,
+                            Proveedor = "Ferretería A"
+                        },
+                        new
+                        {
+                            ProductoId = 3,
+                            Categoria = "Herramientas",
+                            CodigoProducto = "H003",
+                            Descripcion = "Llave inglesa ajustable de 8 pulgadas",
+                            EstaActivo = true,
+                            Nombre = "Llave inglesa",
+                            Precio = 12.30m,
+                            Proveedor = "Ferretería A"
+                        },
+                        new
+                        {
+                            ProductoId = 4,
+                            Categoria = "Pinturas",
+                            CodigoProducto = "P001",
+                            Descripcion = "Pintura acrílica color blanco",
+                            EstaActivo = true,
+                            Nombre = "Pintura acrílica",
+                            Precio = 20.00m,
+                            Proveedor = "Pinturas B"
+                        },
+                        new
+                        {
+                            ProductoId = 5,
+                            Categoria = "Pinturas",
+                            CodigoProducto = "P002",
+                            Descripcion = "Brocha de 2 pulgadas para pintura",
+                            EstaActivo = true,
+                            Nombre = "Brocha de pintura",
+                            Precio = 3.75m,
+                            Proveedor = "Pinturas B"
+                        },
+                        new
+                        {
+                            ProductoId = 6,
+                            Categoria = "Pinturas",
+                            CodigoProducto = "P003",
+                            Descripcion = "Rodillo de pintura de 10 pulgadas",
+                            EstaActivo = true,
+                            Nombre = "Rodillo de pintura",
+                            Precio = 7.25m,
+                            Proveedor = "Pinturas B"
+                        },
+                        new
+                        {
+                            ProductoId = 7,
+                            Categoria = "Plomería",
+                            CodigoProducto = "P004",
+                            Descripcion = "Tubería PVC de 2 pulgadas, longitud de 3m",
+                            EstaActivo = true,
+                            Nombre = "Tubería PVC 2\"",
+                            Precio = 10.50m,
+                            Proveedor = "Plomería C"
+                        },
+                        new
+                        {
+                            ProductoId = 8,
+                            Categoria = "Plomería",
+                            CodigoProducto = "P005",
+                            Descripcion = "Codo PVC de 90 grados",
+                            EstaActivo = true,
+                            Nombre = "Codo PVC 90°",
+                            Precio = 2.00m,
+                            Proveedor = "Plomería C"
+                        },
+                        new
+                        {
+                            ProductoId = 9,
+                            Categoria = "Plomería",
+                            CodigoProducto = "P006",
+                            Descripcion = "Pegamento especial para PVC",
+                            EstaActivo = true,
+                            Nombre = "Pegamento para PVC",
+                            Precio = 4.75m,
+                            Proveedor = "Plomería C"
+                        },
+                        new
+                        {
+                            ProductoId = 10,
+                            Categoria = "Escaleras",
+                            CodigoProducto = "E001",
+                            Descripcion = "Escalera de aluminio de 3 escalones",
+                            EstaActivo = true,
+                            Nombre = "Escalera de aluminio",
+                            Precio = 75.00m,
+                            Proveedor = "Escaleras D"
+                        });
                 });
 
             modelBuilder.Entity("SistemadeVentas.Models.DetalleFactura", b =>

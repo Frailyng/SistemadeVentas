@@ -35,15 +35,10 @@
                     <InputDate @bind-Value="Factura.FechaFactura" class="form-control"> </InputDate>
                 </div>
 
-                <!-- Método de Pago -->
+                <!-- Estado de la Factura -->
                 <div class="mb-3">
-                    <label for="MetodoPago" class="form-label"><strong>Método de Pago:</strong></label>
-                    <InputSelect @bind-Value="Factura.MetodoPago" class="form-select" required>
-                        <option value="">Seleccione un método de pago</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Tarjeta">Tarjeta</option>
-                    </InputSelect>
-                    <ValidationMessage For="@(() => Factura.MetodoPago)" />
+                    <label for="Estado" class="form-label"><strong>Estado:</strong></label>
+                    <input type="text" class="form-control" value="@Factura.Estado" readonly />
                 </div>
 
                 <!-- Selección de Categoría -->
