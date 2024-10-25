@@ -7,6 +7,8 @@ namespace SistemadeVentas.Models
     {
         [Key]
         public int DetalleFacturaId { get; set; }
+
+        public int InventarioId { get; set; }
         [Required(ErrorMessage = "El producto es obligatorio.")]
 
         public int ProductoId { get; set; }

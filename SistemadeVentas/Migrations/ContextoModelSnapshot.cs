@@ -29,6 +29,9 @@ namespace SistemadeVentas.Migrations
                     b.Property<int?>("FacturacionFacturaId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("InventarioId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("PrecioUnitario")
                         .HasColumnType("TEXT");
 

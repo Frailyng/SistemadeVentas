@@ -30,10 +30,14 @@ namespace SistemadeVentas.Services
 
         public async Task<bool> Modificar(Inventario inventario)
         {
-            _context.Update(inventario);
-            return await _context.SaveChangesAsync() > 0;
+            var inventarioExistente = await _context.Inventarios.FindAsync(inventario.InventarioId);
+            if (inventarioExistente != null)
+            {
+                inventarioExistente.CantidadDisponible = inventario.CantidadDisponible; // Asegúrate de que esta propiedad sea actualizada
+                return await _context.SaveChangesAsync() > 0;
+            }
+            return false;
         }
-
 
         public async Task<bool> Existe(int inventarioId)
         {
@@ -55,6 +59,25 @@ namespace SistemadeVentas.Services
                 .Include(i => i.Producto)
                 .FirstOrDefaultAsync(i => i.InventarioId == id);
         }
+
+        public async Task<Inventario> BuscarPorId(int inventarioId)
+        {
+            return await _context.Inventarios.FirstOrDefaultAsync(a => a.InventarioId == inventarioId);
+        }
+        public async Task<bool> Actualizar(Inventario inventario)
+        {
+            try
+            {
+                _context.Inventarios.Update(inventario);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
 
         public async Task<List<Inventario>> Listar(Expression<Func<Inventario, bool>> criterio)
         {

@@ -11,8 +11,8 @@ using SistemadeVentas.DAL;
 namespace SistemadeVentas.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20241025125314_initial")]
-    partial class initial
+    [Migration("20241025141830_inicial")]
+    partial class inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,6 +30,9 @@ namespace SistemadeVentas.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("FacturacionFacturaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("InventarioId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("PrecioUnitario")

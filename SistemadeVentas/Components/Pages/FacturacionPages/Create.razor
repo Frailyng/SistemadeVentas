@@ -1,6 +1,7 @@
 ﻿@page "/Facturacion/Create"
 @inject FacturacionService facturacionService
 @inject ProductosService productosService
+@inject InventarioService InventarioService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
@@ -134,7 +135,7 @@
 </EditForm>
 
 @code {
-   public Facturacion Factura { get; set; } = new Facturacion();
+    public Facturacion Factura { get; set; } = new Facturacion();
     public DetalleFactura DetalleFactura { get; set; } = new();
     public int ProductoSeleccionadoId { get; set; }
     public int CantidadProducto { get; set; } = 1; // Cantidad por defecto 1
@@ -143,9 +144,11 @@
     public List<string> ListaCategoriasUnicas { get; set; } = new();
     public List<DetalleFactura> ListaDetallesFactura { get; set; } = new(); // Lista de detalles de factura
     private string? ErrorMessage { get; set; }
+    public List<Inventario> ListaInventario { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
+        ListaInventario = await InventarioService.Listar(a => true);
         Factura.DetalleFactura = new List<DetalleFactura>();
         // Cargar todos los productos
         ListaProductos = await productosService.Listar(p => true);
@@ -235,6 +238,37 @@
             var guardo = await facturacionService.Guardar(Factura);
             if (guardo)
             {
+                foreach (var detalle in Factura.DetalleFactura)
+                {
+                    // Asegúrate de que el Id de inventario sea correcto
+                    var inventario = await InventarioService.BuscarPorId(detalle.ProductoId); // Cambia a detalle.ProductoId si es el ID correcto
+
+                    if (inventario != null)
+                    {
+                        // Reducir la cantidad en el inventario
+                        inventario.CantidadDisponible -= detalle.Cantidad;
+
+                        // Verificar que la cantidad no sea negativa
+                        if (inventario.CantidadDisponible < 0)
+                        {
+                            inventario.CantidadDisponible = 0;
+                        }
+
+                        // Actualizar el inventario
+                        var actualizado = await InventarioService.Actualizar(inventario);
+                        if (!actualizado)
+                        {
+                            ErrorMessage = $"Error al actualizar el inventario para el producto {detalle.Producto.Nombre}.";
+                            return; // Salir si hay un error
+                        }
+                    }
+                    else
+                    {
+                        ErrorMessage = $"No se encontró el inventario para el producto {detalle.Producto.Nombre}.";
+                        return; // Salir si no se encuentra el inventario
+                    }
+                }
+
                 // Limpiar los campos y la lista de detalles después de guardar
                 Factura = new Facturacion(); // Reiniciar la factura
                 ListaDetallesFactura.Clear(); // Limpiar detalles
@@ -250,4 +284,5 @@
             ErrorMessage = ex.Message;
         }
     }
+
 }
