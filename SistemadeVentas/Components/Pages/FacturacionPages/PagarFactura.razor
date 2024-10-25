@@ -1,0 +1,171 @@
+﻿@page "/PagarFactura/Edit/{FacturaId:int}"
+@inject FacturacionService FacturacionService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="factura" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3><i class="fas fa-money-bill-wave"></i> Pagar Factura</h3>
+        </div>
+
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="FacturaId" class="form-label">Factura ID:</label>
+                <InputNumber @bind-Value="factura.FacturaId" class="form-control" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label for="NombreCliente" class="form-label">Nombre del Cliente:</label>
+                <InputText @bind-Value="factura.NombreCliente" class="form-control" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label for="FechaFactura" class="form-label">Fecha de la Factura:</label>
+                <InputDate @bind-Value="factura.FechaFactura" class="form-control" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label for="Total" class="form-label">Total:</label>
+                <InputNumber @bind-Value="factura.Total" class="form-control" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label for="MetodoPago" class="form-label">Método de Pago:</label>
+                <InputSelect @bind-Value="metodoPago" class="form-control">
+                    <option value="">Seleccionar un método de pago</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                    <option value="Transferencia">Transferencia</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => metodoPago)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="CantidadIngresada" class="form-label">Cantidad Ingresada:</label>
+                <InputNumber @bind-Value="cantidadIngresada" class="form-control" />
+                <ValidationMessage For="@(() => cantidadIngresada)" />
+            </div>
+
+            <!-- Mensajes de error -->
+            @if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert alert-danger">@mensajeError</div>
+            }
+
+            <div class="mb-3">
+                <label for="Estado" class="form-label">Estado:</label>
+                <InputText @bind-Value="factura.Estado" class="form-control" disabled />
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-danger" @onclick="Cancelar"><span class="bi bi-arrow-bar-left"></span> Cancelar </button>
+                <button type="submit" class="btn btn-outline-success"><span class="bi bi-check-circle-fill"></span> Pagar </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<!-- Modal para la devuelta -->
+@if (mostrarModalDevuelta)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display:block;" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devuelta</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@mensajeDevuelta</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="CerrarModal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public int? FacturaId { get; set; }
+    public Facturacion factura { get; set; } = new Facturacion();
+    private string metodoPago;
+    private decimal cantidadIngresada;
+    private bool mostrarModalDevuelta = false;
+
+    private string mensajeError = "";
+    private string mensajeDevuelta = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (FacturaId.HasValue)
+        {
+            factura.FacturaId = FacturaId.Value;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        var facturaEncontrada = await FacturacionService.Buscar(factura.FacturaId);
+        if (facturaEncontrada != null)
+        {
+            factura = facturaEncontrada;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        mensajeError = "";
+        mensajeDevuelta = "";
+
+        if (string.IsNullOrEmpty(metodoPago))
+        {
+            mensajeError = "Debe seleccionar un método de pago.";
+            return;
+        }
+
+        if (cantidadIngresada < factura.Total)
+        {
+            mensajeError = "La cantidad ingresada no puede ser menor al total.";
+        }
+        else if (cantidadIngresada > factura.Total)
+        {
+            decimal devuelta = cantidadIngresada - factura.Total;
+            mensajeDevuelta = $"La devuelta para el cliente es {devuelta:C}.";
+            factura.Estado = "Pagado";
+            mostrarModalDevuelta = true;
+        }
+        else if (cantidadIngresada == factura.Total)
+        {
+            factura.Estado = "Pagado";
+        }
+
+        if (string.IsNullOrEmpty(mensajeError))
+        {
+            var guardo = await FacturacionService.Guardar(factura);
+            if (guardo && !mostrarModalDevuelta)
+            {
+                NavigationManager.NavigateTo("/Facturacion/Index");
+            }
+        }
+    }
+
+    public void CerrarModal()
+    {
+        mostrarModalDevuelta = false;
+        NavigationManager.NavigateTo("/Facturacion/Index");
+    }
+
+    public void Cancelar()
+    {
+        NavigationManager.NavigateTo("/Facturacion/Index");
+    }
+}
+

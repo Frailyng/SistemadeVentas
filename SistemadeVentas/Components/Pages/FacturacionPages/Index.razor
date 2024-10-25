@@ -45,7 +45,7 @@
                         <th>Fecha Factura</th>
                         <th>Total</th>
                         <th>Estado de la Factura</th>
-                        <th>Editar</th>
+                        <th>Realizar Pago</th>
                         <th>Eliminar</th>
                     </tr>
                 </thead>
@@ -61,11 +61,14 @@
                                 <td class="text-center">@factura.Total.ToString("C")</td>
                                 <td class="text-center">@factura.Estado</td>
                                 <td class="text-center">
-                                    <a href="/Facturacion/Edit/@factura.FacturaId" class="btn bi bi-pencil-square"></a>
+                                    <a href="/PagarFactura/Edit/@factura.FacturaId" class="btn btn-success bi bi-wallet"></a>
                                 </td>
+
                                 <td class="text-center">
-                                    <a href="/Facturacion/Delete/@factura.FacturaId" class="btn bi bi-trash"></a>
+                                    <a href="/Facturacion/Delete/@factura.FacturaId" class="btn btn-danger bi bi-trash"></a>
                                 </td>
+
+
                             </tr>
                         }
                     }
